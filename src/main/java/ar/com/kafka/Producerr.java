@@ -12,7 +12,7 @@ public class Producerr {
 
 	public static void main(String[] args) {
 		Properties props = new Properties();
-		props.put("bootstrap.servers", "10.9.150.111:9092");
+		props.put("bootstrap.servers", "localhost:9092");
 		props.put("acks", "all");
 		props.put("retries", 0);
 		props.put("batch.size", 16384);
@@ -23,7 +23,7 @@ public class Producerr {
 
 		Producer<String, String> producer = new KafkaProducer<>(props);
 		System.out.println("Sending HelloKafkaTopic chau hola");
-		ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>("HelloKafkaTopic", "chau", "hola");
+		ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>("HelloKafkaTopic", "dfg", "asd");
 		producer.send(producerRecord);
 		System.out.println("sended");
 		producer.close();

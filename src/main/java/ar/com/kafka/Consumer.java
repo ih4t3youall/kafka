@@ -18,11 +18,11 @@ public class Consumer {
 	
 	public static void main(String[] args) {
 	    Properties props = new Properties();
-	    props.put("bootstrap.servers", "10.9.150.111:9092");
+	    props.put("bootstrap.servers", "localhost:9092");
 	    props.put("group.id", "0");
 	    props.put("enable.auto.commit", "true");
 	    props.put("auto.commit.interval.ms", "1000");
-	    props.put("auto.offset.reset", "latest");
+	    props.put("auto.offset.reset", "earliest");
 	    props.put("session.timeout.ms", "30000");
 	    props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 	    props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
@@ -45,8 +45,7 @@ public class Consumer {
 	    JOptionPane.showMessageDialog(null, "Subscribe to: "+showInputDialog);
 	    
 	    while (true) {
-	    	System.out.println("pooling");
-	      ConsumerRecords<String, String> records = kafkaConsumer.poll(1);
+	      ConsumerRecords<String, String> records = kafkaConsumer.poll(2);
 	      for (ConsumerRecord<String, String> record : records) {
 	        JOptionPane.showMessageDialog(null,"offset = "+record.offset()+", value = "+record.value());
 	        System.out.println();
