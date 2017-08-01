@@ -12,24 +12,21 @@ public class Producerr {
 
 	public static void main(String[] args) {
 		Properties props = new Properties();
-		 props.put("bootstrap.servers", "10.9.150.111:9092");
-		 props.put("acks", "all");
-		 props.put("retries", 0);
-		 props.put("batch.size", 16384);
-		 props.put("linger.ms", 1);
-		 props.put("buffer.memory", 33554432);
-		 props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		 props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		props.put("bootstrap.servers", "10.9.150.111:9092");
+		props.put("acks", "all");
+		props.put("retries", 0);
+		props.put("batch.size", 16384);
+		props.put("linger.ms", 1);
+		props.put("buffer.memory", 102400);
+		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
-		 Producer<String, String> producer = new KafkaProducer<>(props);
-		 for(int i = 0; i < 100; i++) {
-		     producer.send(new ProducerRecord<String, String>("my-topic", Integer.toString(i), Integer.toString(i)));
-		     System.out.println("message sended to my-topic: "+i);
-		 }
-
-		 producer.close();
-		 
-		 
-
+		Producer<String, String> producer = new KafkaProducer<>(props);
+		System.out.println("Sending HelloKafkaTopic chau hola");
+		ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>("HelloKafkaTopic", "chau", "hola");
+		producer.send(producerRecord);
+		System.out.println("sended");
+		producer.close();
+		System.out.println("producer close");
 	}
 }

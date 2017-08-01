@@ -19,7 +19,7 @@ public class Consumer {
 	public static void main(String[] args) {
 	    Properties props = new Properties();
 	    props.put("bootstrap.servers", "10.9.150.111:9092");
-	    props.put("group.id", "group-1");
+	    props.put("group.id", "0");
 	    props.put("enable.auto.commit", "true");
 	    props.put("auto.commit.interval.ms", "1000");
 	    props.put("auto.offset.reset", "latest");
@@ -31,13 +31,21 @@ public class Consumer {
 	    KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(props);
 	    Map<String, List<PartitionInfo>> listTopics = kafkaConsumer.listTopics();
 	    
+	    
+	    String toSubscribe ="";
 	    for(String string : listTopics.keySet()) {
-	    	kafkaConsumer.subscribe(Arrays.asList(string));
-	    	System.out.println("subscribed to: "+string);
+	    	
+	    	toSubscribe+=string+"\n";
 	    	
 	    }
 	    
+	    String showInputDialog = JOptionPane.showInputDialog(toSubscribe);
+	    
+	    kafkaConsumer.subscribe(Arrays.asList(showInputDialog));
+	    JOptionPane.showMessageDialog(null, "Subscribe to: "+showInputDialog);
+	    
 	    while (true) {
+	    	System.out.println("pooling");
 	      ConsumerRecords<String, String> records = kafkaConsumer.poll(1);
 	      for (ConsumerRecord<String, String> record : records) {
 	        JOptionPane.showMessageDialog(null,"offset = "+record.offset()+", value = "+record.value());
