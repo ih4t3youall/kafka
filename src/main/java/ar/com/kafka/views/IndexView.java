@@ -21,6 +21,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.PartitionInfo;
 
+import ar.com.kafka.menu.MainMenu;
 import ar.com.kafka.shape.TrafficLightPanel;
 import ar.com.kafka.threads.ConsumerThread;
 
@@ -36,7 +37,7 @@ public class IndexView extends JFrame {
 
 		
 		
-		
+		setJMenuBar(new MainMenu(this));
 		// panel things
 		// panel.setSize(390,390);
 		JTextField data = new JTextField(30);
