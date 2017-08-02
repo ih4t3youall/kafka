@@ -3,9 +3,11 @@ package ar.com.kafka.views;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -21,22 +23,21 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.PartitionInfo;
 
+import ar.com.kafka.helper.SessionHelper;
 import ar.com.kafka.menu.MainMenu;
+import ar.com.kafka.persistencia.Persistencia;
 import ar.com.kafka.shape.TrafficLightPanel;
 import ar.com.kafka.threads.ConsumerThread;
 
 public class IndexView extends JFrame {
 
 	private ConsumerThread consumerThread;
-	
-	
-	public IndexView() {
+
+	public IndexView() throws IOException {
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout());
 
-		
-		
 		setJMenuBar(new MainMenu(this));
 		// panel things
 		// panel.setSize(390,390);
@@ -63,7 +64,6 @@ public class IndexView extends JFrame {
 		panel.add(response);
 		panel.add(consume);
 
-		
 		// frame things
 		add(panel);
 		setVisible(true);
@@ -71,29 +71,24 @@ public class IndexView extends JFrame {
 		setSize(481, 400);
 		setLocation(400, 400);
 
-		// listeners
-
 		JButton kill = new JButton("kill it!");
 
-//		Round round = new Round();
 		TrafficLightPanel color = new TrafficLightPanel();
 		JPanel panel2 = new JPanel();
 		panel.add(panel2);
 		panel2.add(color);
 		panel2.add(kill);
 		
-		
-		
 		kill.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				color.changeColorRed();
 				consumerThread.interrupt();
-				
+
 			}
 		});
-		
+
 		consume.addActionListener(new ActionListener() {
 
 			@Override
@@ -102,17 +97,16 @@ public class IndexView extends JFrame {
 				Properties props = consumerProperties();
 
 				KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(props);
-				
-				String topic = queues.getSelectedValue();
-				
-				if(topic.equals("") || topic == null)
-						throw new RuntimeException();
 
-				 consumerThread = new ConsumerThread(response, topic);
-				 color.changeColorGreen();
+				String topic = queues.getSelectedValue();
+
+				if (topic.equals("") || topic == null)
+					throw new RuntimeException();
+
+				consumerThread = new ConsumerThread(response, topic);
+				color.changeColorGreen();
 				consumerThread.start();
-				
-				
+
 			}
 		});
 
@@ -159,21 +153,19 @@ public class IndexView extends JFrame {
 	}
 
 	public Properties getProperties() {
+
+		Map<String, JTextField> map = SessionHelper.getOptions();
+		Set<String> key = map.keySet();
 		Properties props = new Properties();
-		props.put("bootstrap.servers", "localhost:9092");
-		props.put("group.id", "group-1");
-		props.put("enable.auto.commit", "true");
-		props.put("auto.commit.interval.ms", "1000");
-		props.put("auto.offset.reset", "earliest");
-		props.put("session.timeout.ms", "30000");
-		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		for (String string : key) {
+			props.put(string, map.get(string).getText());
+		}
+
 		return props;
 	}
 
-	
 	public Properties getProducerProperties() {
-		
+
 		Properties props = new Properties();
 		props.put("bootstrap.servers", "localhost:9092");
 		props.put("acks", "all");
@@ -184,9 +176,9 @@ public class IndexView extends JFrame {
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		return props;
-		
-		
+
 	}
+
 	public Properties consumerProperties() {
 
 		Properties props = new Properties();

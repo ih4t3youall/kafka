@@ -9,7 +9,7 @@ public class SessionHelper {
 
 	private static  Map<String, JTextField> options ;
 	
-	public Map<String,JTextField> getOptions(){
+	public static Map<String,JTextField> getOptions(){
 		
 		if(options == null) {
 			
@@ -21,6 +21,11 @@ public class SessionHelper {
 		return options;
 		
 		
+	}
+
+	public static void setOptions(Object loadSavedFile) {
+		Map<String,JTextField> map = (Map<String,JTextField>)loadSavedFile;
+		options = map;
 	}
 	
 	

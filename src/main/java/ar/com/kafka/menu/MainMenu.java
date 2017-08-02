@@ -2,6 +2,7 @@ package ar.com.kafka.menu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
@@ -23,7 +24,7 @@ public class MainMenu  extends JMenuBar{
 	JRadioButtonMenuItem rbMenuItem;
 	JCheckBoxMenuItem cbMenuItem;
 
-	public MainMenu(IndexView indexView) {
+	public MainMenu(IndexView indexView) throws IOException {
 	
 	
 		menu = new JMenu("archivo");
@@ -31,7 +32,8 @@ public class MainMenu  extends JMenuBar{
 		menuItem = new JMenuItem("Opciones");
 		menu.add(menuItem);
 		add(menu);
-		OptionsDialog dialog = new OptionsDialog(indexView);
+		OptionsDialog dialog;
+			dialog = new OptionsDialog(indexView);
 		
 		menuItem.addActionListener(new ActionListener() {
 			
