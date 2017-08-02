@@ -27,9 +27,9 @@ public class MainMenu  extends JMenuBar{
 	public MainMenu(IndexView indexView) throws IOException {
 	
 	
-		menu = new JMenu("archivo");
+		menu = new JMenu("File");
 		
-		menuItem = new JMenuItem("Opciones");
+		menuItem = new JMenuItem("Options");
 		menu.add(menuItem);
 		add(menu);
 		OptionsDialog dialog;

@@ -24,13 +24,13 @@ public class OptionsDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 	String[] labels = { "bootstrap.servers", "acks", "retries", "batch.size", "linger.ms", "buffer.memory",
 			"key.serializer", "value.serializer", "group.id", "enable.auto.commit", "auto.commit.interval.ms",
-			"auto.offset.reset", "session.timeout.ms", "key.deserializer", "value.deserializer" };
+			"auto.offset.reset", "session.timeout.ms", "key.deserializer", "value.deserializer","heartbeat.interval.ms","maxNumberOfConsumptions" ,"max.poll.records"};
 
 	String[] defaultOptions = { "localhost:9092", "all", "0", "16384", "1", "102400",
 			"org.apache.kafka.common.serialization.StringSerializer",
-			"org.apache.kafka.common.serialization.StringSerializer", "group-1", "true", "1000", "latest", "3000",
+			"org.apache.kafka.common.serialization.StringSerializer", "group-1", "true", "1000", "latest", "30000",
 			"org.apache.kafka.common.serialization.StringDeserializer",
-			"org.apache.kafka.common.serialization.StringDeserializer" };
+			"org.apache.kafka.common.serialization.StringDeserializer","2000","0","1" };
 	Persistencia per = new Persistencia();
 
 	public OptionsDialog(IndexView indexView) throws IOException {

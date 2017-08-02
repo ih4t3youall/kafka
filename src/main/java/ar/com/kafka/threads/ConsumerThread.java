@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
@@ -11,35 +12,31 @@ import javax.swing.JTextArea;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.PartitionInfo;
+
+
+import ar.com.kafka.helper.SessionHelper;
 
 public class ConsumerThread extends Thread {
 
 	private JTextArea textArea;
 	private String topic;
 	private int counter;
+	boolean flag ;
 
 	public ConsumerThread(JTextArea textArea,String topic) {
 
 		this.textArea = textArea;
 		this.topic = topic;
 		counter=0;
+		flag = false;
 	}
 
 	public void run() {
 
 		Properties props = new Properties();
-		props.put("bootstrap.servers", "localhost:9092");
-		props.put("group.id", "group-1");
-		props.put("enable.auto.commit", "true");
-		props.put("auto.commit.interval.ms", "1000");
-		props.put("auto.offset.reset", "earliest");
-		props.put("session.timeout.ms", "30000");
-		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-
+		props = SessionHelper.getConsumerProperties();
+	
 		KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(props);
-		Map<String, List<PartitionInfo>> listTopics = kafkaConsumer.listTopics();
 
 		System.out.println("subscribed to: "+topic);
 
@@ -48,20 +45,42 @@ public class ConsumerThread extends Thread {
 		kafkaConsumer.subscribe(Arrays.asList(showInputDialog));
 		JOptionPane.showMessageDialog(null, "Subscribe to: " + showInputDialog);
 
+		int maxNumberOfConsumptions = SessionHelper.getMaxNumberOfConsumptions();
+		
 		while (true) {
-			ConsumerRecords<String, String> records = kafkaConsumer.poll(2);
+			ConsumerRecords<String, String> records = kafkaConsumer.poll(1);
+			
 			for (ConsumerRecord<String, String> record : records) {
 				textArea.setText(textArea.getText()+record.value()+"\n");
 				counter++;
-				
 			}
-			if(counter == 10) {
-				textArea.setText("");
-				counter =0;
+			flag = needToBreak(maxNumberOfConsumptions, counter);
+			if(flag) {
+				System.out.println("thread is dying");
+				kafkaConsumer.close();
+				break;
 			}
 			
 		}
+		
+		System.out.println("thread is dead.");
 
+	}
+	
+	public boolean needToBreak(int maxNumberOfConsumptions, int count) {
+		
+		if(maxNumberOfConsumptions != 0 ) {
+			
+			if(maxNumberOfConsumptions <= count) {
+				return true;
+			}
+			
+		}
+		
+		return false;
+		
+		
+		
 	}
 
 }

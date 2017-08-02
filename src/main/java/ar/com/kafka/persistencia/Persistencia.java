@@ -1,12 +1,16 @@
 package ar.com.kafka.persistencia;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Persistencia {
@@ -24,6 +28,29 @@ public class Persistencia {
 		if (!fileExist(filename)) {
 			file.createNewFile();
 		}
+	}
+	
+	
+	public List<String> readLine(String fullpath) {
+		
+			List<String> toSend = new ArrayList<String>();
+			System.out.println("reading line to line fullpath: "+fullpath);
+		    try {
+		      FileReader fr = new FileReader(fullpath);
+		      BufferedReader br = new BufferedReader(fr);
+		 
+		      String linea;
+		      while((linea = br.readLine()) != null)
+		        toSend.add(linea);
+		 
+		      fr.close();
+		    }
+		    catch(Exception e) {
+		      System.out.println("Exception on file: "+ fullpath + ": " + e);
+		    }
+		    System.out.println("read ok.");
+		    return toSend;
+		
 	}
 
 	public boolean fileExist(String filename) {

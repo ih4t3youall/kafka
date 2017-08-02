@@ -11,11 +11,16 @@ import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -32,6 +37,7 @@ import ar.com.kafka.threads.ConsumerThread;
 public class IndexView extends JFrame {
 
 	private ConsumerThread consumerThread;
+	private boolean threadRuning = false;
 
 	public IndexView() throws IOException {
 
@@ -43,48 +49,75 @@ public class IndexView extends JFrame {
 		// panel.setSize(390,390);
 		JTextField data = new JTextField(30);
 		JButton send = new JButton("send");
+		JButton batch = new JButton("BatchSend");
 
 		JTextArea response = new JTextArea("", 10, 30);
+
+		JScrollPane scroll = new JScrollPane(response);
+		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		response.setEditable(false);
 		JButton consume = new JButton("consume");
 
 		JList<String> queues = new JList<String>();
-		response.setEditable(false);
 		JButton showQueues = new JButton("show Queues");
 		DefaultListModel<String> model = new DefaultListModel<String>();
+		model.addElement("nothing to display");
 		queues.setModel(model);
 
 		// add panel
-		panel.add(data);
-		panel.add(send);
+		JPanel panelSend = new JPanel();
+		panelSend.setLayout(new FlowLayout());
+
+		panelSend.add(data);
+		panelSend.add(send);
+		panelSend.add(batch);
+
+		panel.add(panelSend);
 
 		panel.add(queues);
 		panel.add(showQueues);
 
-		panel.add(response);
+		panel.add(scroll);
 		panel.add(consume);
 
 		// frame things
 		add(panel);
 		setVisible(true);
 		// width height
-		setSize(481, 400);
+		setSize(570, 400);
 		setLocation(400, 400);
 
 		JButton kill = new JButton("kill it!");
+		JButton clean = new JButton("Clean");
+		
+		
 
 		TrafficLightPanel color = new TrafficLightPanel();
 		JPanel panel2 = new JPanel();
 		panel.add(panel2);
 		panel2.add(color);
 		panel2.add(kill);
+		panel2.add(clean);
 		
+		
+		clean.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				response.setText("");
+			}
+		});
+
 		kill.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				color.changeColorRed();
-				consumerThread.interrupt();
+				if (threadRuning) {
+					consumerThread.interrupt();
+					threadRuning = false;
+				}
 
 			}
 		});
@@ -94,18 +127,21 @@ public class IndexView extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				Properties props = consumerProperties();
-
+				Properties props = SessionHelper.getConsumerProperties();
 				KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(props);
-
 				String topic = queues.getSelectedValue();
 
 				if (topic.equals("") || topic == null)
 					throw new RuntimeException();
 
-				consumerThread = new ConsumerThread(response, topic);
-				color.changeColorGreen();
-				consumerThread.start();
+				if (threadRuning) {
+					JOptionPane.showMessageDialog(null, "Thread already running!");
+				} else {
+					consumerThread = new ConsumerThread(response, topic);
+					color.changeColorGreen();
+					consumerThread.start();
+					threadRuning = true;
+				}
 
 			}
 		});
@@ -117,13 +153,51 @@ public class IndexView extends JFrame {
 
 				String topic = queues.getSelectedValue();
 				String message = data.getText();
-				Properties props = getProducerProperties();
-				Producer<String, String> producer = new KafkaProducer<>(props);
-				System.out.println("send to: " + topic + " value: " + message);
-				ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, "dfg",
-						message);
-				producer.send(producerRecord);
-				producer.close();
+
+				if (message == "") {
+					JOptionPane.showMessageDialog(null, "message can not be empty");
+				} else {
+					Properties props = SessionHelper.getProducerProperties();
+					Producer<String, String> producer = new KafkaProducer<>(props);
+					System.out.println("send to: " + topic + " value: " + message);
+					ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, "dfg",
+							message);
+					producer.send(producerRecord);
+					producer.close();
+					data.setText("");
+				}
+			}
+		});
+
+		batch.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser chooser = new JFileChooser();
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("txt", "gif", "jpg");
+				chooser.setFileFilter(filter);
+				int returnVal = chooser.showOpenDialog(null);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+
+					Persistencia per = new Persistencia();
+					List<String> messages = per.readLine(chooser.getSelectedFile().getAbsolutePath());
+
+					String topic = queues.getSelectedValue();
+					Properties props = SessionHelper.getProducerProperties();
+					Producer<String, String> producer = new KafkaProducer<>(props);
+
+					for (String message : messages) {
+						System.out.println("send to: " + topic + " value: " + message);
+						ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, "dfg",
+								message);
+						producer.send(producerRecord);
+					}
+
+					producer.close();
+
+				} else {
+					JOptionPane.showMessageDialog(null, "no ok");
+				}
 
 			}
 		});
@@ -132,10 +206,11 @@ public class IndexView extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Properties props = getProperties();
+				Properties props = SessionHelper.getConsumerProperties();
 				KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(props);
 				Map<String, List<PartitionInfo>> listTopics = kafkaConsumer.listTopics();
-				String toPost = "";
+
+				model.clear();
 
 				for (String string : listTopics.keySet()) {
 
@@ -149,48 +224,6 @@ public class IndexView extends JFrame {
 		});
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-	}
-
-	public Properties getProperties() {
-
-		Map<String, JTextField> map = SessionHelper.getOptions();
-		Set<String> key = map.keySet();
-		Properties props = new Properties();
-		for (String string : key) {
-			props.put(string, map.get(string).getText());
-		}
-
-		return props;
-	}
-
-	public Properties getProducerProperties() {
-
-		Properties props = new Properties();
-		props.put("bootstrap.servers", "localhost:9092");
-		props.put("acks", "all");
-		props.put("retries", 0);
-		props.put("batch.size", 16384);
-		props.put("linger.ms", 1);
-		props.put("buffer.memory", 102400);
-		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		return props;
-
-	}
-
-	public Properties consumerProperties() {
-
-		Properties props = new Properties();
-		props.put("bootstrap.servers", "localhost:9092");
-		props.put("group.id", "group-1");
-		props.put("enable.auto.commit", "true");
-		props.put("auto.commit.interval.ms", "1000");
-		props.put("auto.offset.reset", "latest");
-		props.put("session.timeout.ms", "30000");
-		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		return props;
 
 	}
 
