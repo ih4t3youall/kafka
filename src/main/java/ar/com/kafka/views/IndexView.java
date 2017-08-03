@@ -160,7 +160,7 @@ public class IndexView extends JFrame {
 					Properties props = SessionHelper.getProducerProperties();
 					Producer<String, String> producer = new KafkaProducer<>(props);
 					System.out.println("send to: " + topic + " value: " + message);
-					ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, "dfg",
+					ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, "clave",
 							message);
 					producer.send(producerRecord);
 					producer.close();
@@ -195,9 +195,7 @@ public class IndexView extends JFrame {
 
 					producer.close();
 
-				} else {
-					JOptionPane.showMessageDialog(null, "no ok");
-				}
+				} 
 
 			}
 		});

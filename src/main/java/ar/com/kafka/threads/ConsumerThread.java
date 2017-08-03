@@ -44,14 +44,15 @@ public class ConsumerThread extends Thread {
 
 		kafkaConsumer.subscribe(Arrays.asList(showInputDialog));
 		JOptionPane.showMessageDialog(null, "Subscribe to: " + showInputDialog);
-
+		
 		int maxNumberOfConsumptions = SessionHelper.getMaxNumberOfConsumptions();
 		
 		while (true) {
 			ConsumerRecords<String, String> records = kafkaConsumer.poll(1);
 			
+			
 			for (ConsumerRecord<String, String> record : records) {
-				textArea.setText(textArea.getText()+record.value()+"\n");
+				textArea.setText(textArea.getText()+"key: "+record.key()+" value: "+record.value()+"\n");
 				counter++;
 			}
 			flag = needToBreak(maxNumberOfConsumptions, counter);
