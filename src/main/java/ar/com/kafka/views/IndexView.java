@@ -3,11 +3,12 @@ package ar.com.kafka.views;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -36,8 +37,14 @@ import ar.com.kafka.threads.ConsumerThread;
 
 public class IndexView extends JFrame {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8090714351624196916L;
 	private ConsumerThread consumerThread;
 	private boolean threadRuning = false;
+	private JList<String> queues = new JList<String>();
+	private JTextField data = new JTextField(30);
 
 	public IndexView() throws IOException {
 
@@ -47,7 +54,7 @@ public class IndexView extends JFrame {
 		setJMenuBar(new MainMenu(this));
 		// panel things
 		// panel.setSize(390,390);
-		JTextField data = new JTextField(30);
+		
 		JButton send = new JButton("send");
 		JButton batch = new JButton("BatchSend");
 
@@ -58,7 +65,6 @@ public class IndexView extends JFrame {
 		response.setEditable(false);
 		JButton consume = new JButton("consume");
 
-		JList<String> queues = new JList<String>();
 		JButton showQueues = new JButton("show Queues");
 		DefaultListModel<String> model = new DefaultListModel<String>();
 		model.addElement("nothing to display");
@@ -89,6 +95,29 @@ public class IndexView extends JFrame {
 
 		JButton kill = new JButton("kill it!");
 		JButton clean = new JButton("Clean");
+		
+		data.addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if ( 10 == e.getKeyCode()) {
+					sendAMessage();
+				}
+				
+			}
+		});
 		
 		
 
@@ -150,22 +179,7 @@ public class IndexView extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
-				String topic = queues.getSelectedValue();
-				String message = data.getText();
-
-				if (message == "") {
-					JOptionPane.showMessageDialog(null, "message can not be empty");
-				} else {
-					Properties props = SessionHelper.getProducerProperties();
-					Producer<String, String> producer = new KafkaProducer<>(props);
-					System.out.println("send to: " + topic + " value: " + message);
-					ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, "clave",
-							message);
-					producer.send(producerRecord);
-					producer.close();
-					data.setText("");
-				}
+				sendAMessage();
 			}
 		});
 
@@ -223,6 +237,25 @@ public class IndexView extends JFrame {
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+	}
+	
+	public void sendAMessage() {
+		String topic = queues.getSelectedValue();
+		String message = data.getText();
+
+		if (message == "") {
+			JOptionPane.showMessageDialog(null, "message can not be empty");
+		} else {
+			Properties props = SessionHelper.getProducerProperties();
+			Producer<String, String> producer = new KafkaProducer<>(props);
+			System.out.println("send to: " + topic + " value: " + message);
+			ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, "clave",
+					message);
+			producer.send(producerRecord);
+			producer.close();
+			data.setText("");
+		}
+		
 	}
 
 }
