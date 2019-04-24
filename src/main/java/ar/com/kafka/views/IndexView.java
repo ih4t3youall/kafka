@@ -45,8 +45,12 @@ public class IndexView extends JFrame {
 	private boolean threadRuning = false;
 	private JList<String> queues = new JList<String>();
 	private JTextField data = new JTextField(30);
+	private IndexView indexView;
+	private String topic;
+	private JButton setTopic;
 
 	public IndexView() throws IOException {
+		indexView=this;
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout());
@@ -70,6 +74,7 @@ public class IndexView extends JFrame {
 		model.addElement("nothing to display");
 		queues.setModel(model);
 
+		setTopic = new JButton("set topic");
 		// add panel
 		JPanel panelSend = new JPanel();
 		panelSend.setLayout(new FlowLayout());
@@ -81,6 +86,7 @@ public class IndexView extends JFrame {
 		panel.add(panelSend);
 
 		panel.add(queues);
+		panel.add(setTopic);
 		panel.add(showQueues);
 
 		panel.add(scroll);
@@ -182,6 +188,9 @@ public class IndexView extends JFrame {
 				sendAMessage();
 			}
 		});
+		setTopic.addActionListener((x)->{
+			topic = JOptionPane.showInputDialog("insert a topic");
+		});
 
 		batch.addActionListener(new ActionListener() {
 
@@ -196,7 +205,6 @@ public class IndexView extends JFrame {
 					Persistencia per = new Persistencia();
 					List<String> messages = per.readLine(chooser.getSelectedFile().getAbsolutePath());
 
-					String topic = queues.getSelectedValue();
 					Properties props = SessionHelper.getProducerProperties();
 					Producer<String, String> producer = new KafkaProducer<>(props);
 
@@ -222,21 +230,16 @@ public class IndexView extends JFrame {
 				KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(props);
 				Map<String, List<PartitionInfo>> listTopics = kafkaConsumer.listTopics();
 
-				model.clear();
-
-				for (String string : listTopics.keySet()) {
-
-					model.addElement(string);
-
-				}
-
-				kafkaConsumer.close();
+				new ShowQueues(indexView,listTopics.keySet());
 
 			}
 		});
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+	}
+	public void setTopic(String topic){
+		this.topic = topic;
 	}
 	
 	public void sendAMessage() {
