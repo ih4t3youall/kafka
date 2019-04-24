@@ -164,7 +164,6 @@ public class IndexView extends JFrame {
 
 				Properties props = SessionHelper.getConsumerProperties();
 				KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(props);
-				String topic = queues.getSelectedValue();
 
 				if (topic.equals("") || topic == null)
 					throw new RuntimeException();
@@ -243,7 +242,6 @@ public class IndexView extends JFrame {
 	}
 	
 	public void sendAMessage() {
-		String topic = queues.getSelectedValue();
 		String message = data.getText();
 
 		if (message == "") {
