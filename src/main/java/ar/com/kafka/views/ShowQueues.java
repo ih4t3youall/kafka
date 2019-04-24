@@ -2,6 +2,9 @@ package ar.com.kafka.views;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 
 public class ShowQueues extends JFrame {
@@ -12,7 +15,10 @@ public class ShowQueues extends JFrame {
     private JList<String> queues;
 
 
-    public ShowQueues(IndexView indexView , Set<String> list){
+    public ShowQueues(IndexView indexView , Set<String> set){
+
+        List<String> list = new ArrayList<>(set);
+        Collections.sort(list);
         this.indexView = indexView;
         aceptar = new JButton("Aceptar");
 
