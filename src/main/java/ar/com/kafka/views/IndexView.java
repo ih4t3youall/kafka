@@ -49,6 +49,7 @@ public class IndexView extends JFrame {
 	private IndexView indexView;
 	private String topic;
 	private JButton setTopic;
+	protected DefaultListModel<String> model = new DefaultListModel<String>();
 
 	public IndexView() throws IOException {
 		indexView=this;
@@ -71,7 +72,6 @@ public class IndexView extends JFrame {
 		JButton consume = new JButton("consume");
 
 		JButton showQueues = new JButton("show Queues");
-		DefaultListModel<String> model = new DefaultListModel<String>();
 		model.addElement("nothing to display");
 		queues.setModel(model);
 
@@ -189,6 +189,7 @@ public class IndexView extends JFrame {
 		});
 		setTopic.addActionListener((x)->{
 			topic = JOptionPane.showInputDialog("insert a topic");
+			updateModel(topic);
 		});
 
 		batch.addActionListener(new ActionListener() {
@@ -239,6 +240,12 @@ public class IndexView extends JFrame {
 	}
 	public void setTopic(String topic){
 		this.topic = topic;
+		updateModel(topic);
+	}
+
+	private void updateModel(String topic){
+		model.clear();
+		model.addElement(topic);
 	}
 	
 	public void sendAMessage() {
