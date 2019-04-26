@@ -43,8 +43,11 @@ public class ConsumerThread extends Thread {
 		String showInputDialog = topic;
 
 		kafkaConsumer.subscribe(Arrays.asList(showInputDialog));
-		JOptionPane.showMessageDialog(null, "Subscribe to: " + showInputDialog);
-		
+
+		new Thread(()->{
+			JOptionPane.showMessageDialog(null, "Subscribe to: " + showInputDialog);
+		}).start();
+
 		int maxNumberOfConsumptions = SessionHelper.getMaxNumberOfConsumptions();
 		
 		while (true) {

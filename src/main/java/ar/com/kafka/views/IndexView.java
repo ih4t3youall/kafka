@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -41,7 +42,7 @@ public class IndexView extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 8090714351624196916L;
-	private ConsumerThread consumerThread;
+	private ExecutorService executorService;
 	private boolean threadRuning = false;
 	private JList<String> queues = new JList<String>();
 	private JTextField data = new JTextField(30);
@@ -150,7 +151,7 @@ public class IndexView extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				color.changeColorRed();
 				if (threadRuning) {
-					consumerThread.interrupt();
+					executorService.shutdownNow();
 					threadRuning = false;
 				}
 
@@ -171,9 +172,8 @@ public class IndexView extends JFrame {
 				if (threadRuning) {
 					JOptionPane.showMessageDialog(null, "Thread already running!");
 				} else {
-					consumerThread = new ConsumerThread(response, topic);
 					color.changeColorGreen();
-					consumerThread.start();
+					executorService.submit(new ConsumerThread(response, topic));
 					threadRuning = true;
 				}
 
